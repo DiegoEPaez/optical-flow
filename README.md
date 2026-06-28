@@ -4,12 +4,12 @@ Thesis project investigating **self-supervised optical flow** on the **YouTube-8
 
 ## Overview
 
-Implements FlowNetS for learning optical flow without ground-truth labels via photometric consistency on video pairs.
+Implements FlowNet Simple for learning optical flow without ground-truth labels via photometric consistency on video pairs.
 
 ## Features
 
 - YouTube-8M video ID & category downloader
-- FlowNetS (original + modified with per-level masks)
+- FlowNet Simple (original + modified with per-level masks)
 - Self-supervised multi-scale photometric loss training
 - Sintel dataset support for evaluation
 - HRNet backbone (experimental)
@@ -26,7 +26,7 @@ text## Installation
 ```bash
 git clone https://github.com/DiegoEPaez/optical-flow.git
 cd optical-flow
-pip install torch torchvision torchaudio opencv-python matplotlib
+pip install torch torchvision opencv-python matplotlib
 Usage
 Download YouTube-8M IDs
 Bashpython youtube8m/download_video_ids.py
