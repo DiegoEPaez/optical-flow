@@ -14,22 +14,17 @@ Implements FlowNet Simple for learning optical flow without ground-truth labels 
 - Sintel dataset support for evaluation
 - HRNet backbone (experimental)
 
-## Structure
-├── youtube8m/      # Data download tools
-├── models/         # FlowNet implementations
-├── scripts/        # Training & utility scripts
-├── config/         # Configuration
-├── settings.py
-└── tests/
-text## Installation
+## Running the Project
+Make sure you have python with poetry installed.
+Also install ffmpeg.
 
-```bash
-git clone https://github.com/DiegoEPaez/optical-flow.git
-cd optical-flow
-pip install torch torchvision opencv-python matplotlib
-Usage
-Download YouTube-8M IDs
-Bashpython youtube8m/download_video_ids.py
+First, install the environment (requires python 3.12):
+poetry install
+
+The next command will download youtube8m video ids, then it will use these ids to download youtube videos and split them into frames, by scene.
+The downloaded frames are the ones with continuous scenes, near the middle of the film:
+python src/optical_flow/scripts/download_images.py
+
 Train
 Bashpython scripts/train_flownet.py
 References
