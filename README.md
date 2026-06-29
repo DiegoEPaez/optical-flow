@@ -1,6 +1,7 @@
 # Optical Flow
 
-Thesis project investigating **self-supervised optical flow** on the **YouTube-8M** dataset using FlowNet.
+Thesis project investigating **self-supervised optical flow** on the **YouTube-8M** dataset using FlowNet. Thesis supervisor: Michael Romanov
+RomanovMikeV.
 
 ## Overview
 
