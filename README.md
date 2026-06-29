@@ -8,7 +8,7 @@ Implements FlowNet Simple for learning optical flow without ground-truth labels 
 
 ## Features
 
-- YouTube-8M video ID & category downloader
+- YouTube-8M video ID & category downloader (categories obtained from https://github.com/gsssrao/youtube-8m-videos-frames)
 - FlowNet Simple (original + modified with per-level masks)
 - Self-supervised multi-scale photometric loss training
 - Sintel dataset support for evaluation

@@ -6,16 +6,15 @@ import os.path as osp
 import yt_dlp
 import cv2
 import math
+from pathlib import Path
 
-from scenedetect import VideoManager
-from scenedetect import SceneManager
-from scenedetect.detectors import ContentDetector
+from scenedetect import detect, ContentDetector
 
 from collections import deque
 
-from settings import YOUTUBE8M_IDS_FILE, YOUTUBE_URL
-from youtube8m.download_video_ids import save_ids
-from utils import count_lines, file_startswith
+from optical_flow.settings import YOUTUBE8M_IDS_FILE, YOUTUBE_URL
+from optical_flow.youtube8m.download_video_ids import save_ids
+from optical_flow.youtube8m.utils import count_lines, file_startswith
 
 log = logging.getLogger(__name__)
 
@@ -26,12 +25,18 @@ class DownloadYouTube:
         self.ids_buffer_size = ids_buffer_size
         self.buffer = deque(maxlen=ids_buffer_size)
         self.buffer_idx = 0
-        self.category_count = self.__count_categories()
         save_ids()
+        self.category_count = self.__count_categories()
 
     def __count_categories(self):
         count = {}
-        with open(YOUTUBE8M_IDS_FILE, "r") as file_read:
+        current_file = Path(__file__).resolve()
+        project_root = current_file.parent.parent
+        relative_path = current_file.relative_to(project_root)
+        print(current_file)
+        print(project_root)
+        print(relative_path)
+        with open(YOUTUBE8M_IDS_FILE, "r", encoding='utf-8') as file_read:
             while line := file_read.readline():
                 category = line.split(",")[0]
                 count[category] = count.get(category, 0) + 1
@@ -66,7 +71,7 @@ class DownloadYouTube:
             idx_ids = self.__random_sample(n_lines)
 
         log.info("Selecting videos in buffer")
-        with open(YOUTUBE8M_IDS_FILE, "r") as file_read:
+        with open(YOUTUBE8M_IDS_FILE, "r", encoding="utf-8") as file_read:
             i = 0
             while line := file_read.readline():
                 if i in idx_ids:
@@ -123,8 +128,8 @@ class DownloadYouTube:
         # yt_dlp may merge files into mkv so we need to double check name by reading it from disk
         if name:
             log.info(f"Download name: {name}")
-            fname = name.split("/")[1]
-            fname_woext = fname[::-1].split(".", 1)[1][::-1]
+            fname = os.path.basename(name)
+            fname_woext, _ = os.path.splitext(fname)
 
             log.info(f"Fname woext {fname_woext}")
             corrected_name = file_startswith(dir, fname_woext)
@@ -138,21 +143,15 @@ class DownloadYouTube:
     @staticmethod
     def find_scenes(video_path, threshold=20.0):
         # Create our video & scene managers, then add the detector.
+        log.info(f"Detecting scenes for {video_path}...")
 
-        video_manager = VideoManager([video_path])
-        scene_manager = SceneManager()
-        scene_manager.add_detector(
-            ContentDetector(threshold=threshold))
-
-        # Improve processing speed by downscaling before processing.
-        video_manager.set_downscale_factor()
-
-        # Start the video manager and perform the scene detection.
-        video_manager.start()
-        scene_manager.detect_scenes(frame_source=video_manager)
+        # Find scenes
+        scene_list = detect(video_path, ContentDetector(threshold=threshold))
 
         # Each returned scene is a tuple of the (start, end) timecode.
-        return scene_manager.get_scene_list()
+        frame_scenes = [(scene[0].get_frames(), scene[1].get_frames()) for scene in scene_list]
+        
+        return frame_scenes
 
     @staticmethod
     def skip_rate(every_fps, fps):
@@ -199,6 +198,38 @@ class DownloadYouTube:
 
     @staticmethod
     def eligible_frames(n_frames, skip, scenes):
+        """
+        Calculate a stable, continuous frame range within a single video scene.
+
+        This method selects the most centrally located, continuous scene that can 
+        accommodate the requested number of frames and downsampling interval. It 
+        centers the extraction window within that scene and applies a 3-frame safety 
+        buffer at the scene boundaries to avoid video encoding/transition artifacts 
+        detrimental to optical flow computation.
+
+        Parameters
+        ----------
+        n_frames : int or None
+            The number of target frames required for the sequence. If None, the 
+            entire video range is returned.
+        skip : int or None
+            The frame sampling rate (stride). For example, a skip of 2 selects every 
+            other frame. If None, the entire video range is returned.
+        scenes : list of tuple of (int, int)
+            A list of detected scenes, where each tuple contains the start and 
+            end frame indices `(start_frame, end_frame)`.
+
+        Returns
+        -------
+        first_frame : int
+            The calculated start frame index for the safe extraction window.
+        last_frame : int
+            The calculated end frame index for the safe extraction window.
+            
+        See Also
+        --------
+        mid_scene_interval : Selects the best candidate scene based on size and centrality.
+        """
         if n_frames is None or skip is None:
             return int(scenes[0][0]), int(scenes[-1][1])
 

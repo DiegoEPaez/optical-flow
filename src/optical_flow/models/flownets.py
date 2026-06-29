@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.nn.init import kaiming_normal_, constant_
-from util import conv, predict_flow, deconv, crop_like, predict_mask, predict_flow_with_mask
+from optical_flow.models.util import conv, predict_flow, deconv, crop_like, predict_mask, predict_flow_with_mask
 
 __all__ = [
     'flownets', 'flownets_bn'
@@ -13,7 +13,7 @@ __all__ = [
 class FlowNetS(nn.Module):
     expansion = 1
 
-    def __init__(self, flow_layers=5, batchNorm=True):
+    def __init__(self, batchNorm=True):
         super(FlowNetS,self).__init__()
 
         self.batchNorm = batchNorm
@@ -95,7 +95,7 @@ class FlowNetS(nn.Module):
     
     
 class FlowNetModified(FlowNetS):
-    def __init__(self, flow_layers=5, batchNorm=True):
+    def __init__(self, flow_layers=5):
         super(FlowNetModified, self).__init__()
         self.predict_flowl6 = predict_flow(1024, flow_layers)
         self.predict_flowl5 = predict_flow(1026, flow_layers)

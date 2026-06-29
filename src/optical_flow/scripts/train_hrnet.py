@@ -1,12 +1,10 @@
-import torch
-
-from torch.utils.data import DataLoader
-from models.optical_flow import YoutubeDataset
-from models.hrnet.cls_hrnet import HighResolutionNet
 import segmentation_models_pytorch as smp
+import torch
+from torch.utils.data import DataLoader
 
-from settings import hrnet_w18_cfg
-
+from optical_flow.models.hrnet.cls_hrnet import HighResolutionNet
+from optical_flow.models.datasets import YoutubeDataset
+from optical_flow.settings import hrnet_w18_cfg
 
 class HighResolutionNetEncoder(HighResolutionNet):
 

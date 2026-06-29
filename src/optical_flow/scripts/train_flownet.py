@@ -1,7 +1,4 @@
 import sys
-from models.flownets import FlowNetS, FlowNetModified
-from models.util import *
-from models.of_datasets import YoutubeDataset, SintelDataset
 import torch
 import torch.nn.functional as F
 import math
@@ -17,6 +14,10 @@ from torch.utils.data import DataLoader
 
 import os
 import os.path as osp
+
+from optical_flow.models.flownets import FlowNetS, FlowNetModified
+from optical_flow.models.util import *
+from optical_flow.models.datasets import YoutubeDataset, SintelDataset
 
 def photometric_loss(im1, im2, eps=0.01, q=0.4):
     dif = im1 - im2
@@ -40,7 +41,7 @@ def multiscale_photometric(network_output, images1, images2, weights=None):
 
     return loss
 
-def train(netm model_dir):
+def train(net, model_file):
     optimizer = torch.optim.Adam(net.parameters(), lr=0.0001)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -49,18 +50,19 @@ def train(netm model_dir):
 
     q = deque(maxlen=20)
 
-    if osp.exists(model_dir):
-        net.load_state_dict(torch.load(model_dir))
-
-    dataset15 = SintelDataset()
-    #dataset15 = YoutubeDateset()
+    if osp.exists(model_file):
+        net.load_state_dict(torch.load(model_file))
+    elif not osp.exists(osp.dirname(model_file)):
+        os.makedirs(osp.dirname(model_file))
+    
+    #dataset15 = SintelDataset()
+    dataset15 = YoutubeDataset()
 
     dataloader15 = DataLoader(dataset15, batch_size=10, shuffle=True, num_workers=0)
 
     i = 0
     while True:
         for images,_ in dataloader15:
-
             images1, images2, flipped_images = splitted_im(images)
             images = images.to(device)
             images2 = images2.to(device)
@@ -82,7 +84,7 @@ def train(netm model_dir):
             optimizer.zero_grad()
             
             if i % 200 == 0:
-                torch.save(net.state_dict(), model_dir)
+                torch.save(net.state_dict(), model_file)
 
             if i % 1000 == 0:
                 print(epe_sintel(net))
@@ -95,9 +97,9 @@ def main():
     net = FlowNetS()
     # net = FlowNetModified()
 
-    model_dir = 'trained/flownet2s.pth'
+    model_dir = osp.join("trained", "flownet2s.pth")
 
-    train(net, model_dir, )
+    train(net, model_dir)
 
 
 

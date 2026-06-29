@@ -406,9 +406,9 @@ def one_scale(output, target):
 
 def splitted_im(images):
     # flip images order
-    images1 = images[:,:3]
-    images2 = images[:,3:]
-    flipped_images = torch.cat([images2,images1], dim=1)
+    images1 = images[:, :3]
+    images2 = images[:, 3:]
+    flipped_images = torch.cat([images2, images1], dim=1)
 
     return images1, images2, flipped_images
 

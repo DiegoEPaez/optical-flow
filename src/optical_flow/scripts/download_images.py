@@ -4,7 +4,7 @@ import logging
 from PIL import Image
 import shutil
 
-from youtube8m.download_youtube import DownloadYouTube
+from optical_flow.youtube8m.download_youtube import DownloadYouTube
 
 log = logging.getLogger(__name__)
 
@@ -20,14 +20,15 @@ def download_frames(every_fps=10, n_frames=100):
         if name == invalid_video:
             continue
 
-        file_name = name.split("/")[1]
-        curr_path = f"frames/{file_name}"
+        fname = os.path.basename(name)
+        fname_woext, _ = os.path.splitext(fname)
+        curr_path = osp.join("frames", fname_woext)
         if not osp.exists(curr_path):
             frame_idx = 0
             os.makedirs(curr_path)
 
         im = Image.fromarray(frame)
-        im_name = f"{curr_path}/{frame_idx:06d}-{scene_change}.jpg"
+        im_name = osp.join(curr_path,f"{frame_idx:06d}-{scene_change}.jpg")
         im.save(im_name)
 
         if frame_idx == 0:

@@ -8,9 +8,10 @@ import asyncio
 import aiohttp
 import shutil
 
-from settings import *
 from collections import deque
-from utils import keep_after, random_name
+
+from optical_flow.youtube8m.utils import keep_after, random_name
+from optical_flow.settings import *
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def read_mids(categs_file=YOUTUBE8M_CATEGORIES_FILE):
     """
     mids, categories = [], []
 
-    with open(categs_file, "r") as file:
+    with open(categs_file, "r", encoding="utf-8") as file:
         while line := file.readline().rstrip():
             line_splitted = line.split()
             mids.append(line_splitted[2][1:-1])
@@ -42,9 +43,9 @@ def delete_category(category_to_delete, ids_file=YOUTUBE8M_IDS_FILE):
     :param ids_file: name of the file from which lines will be removed
     :return: None
     """
-    with open(ids_file, "r") as file_read:
+    with open(ids_file, "r", encoding="utf-8") as file_read:
         temp_file = random_name(15)
-        with open(temp_file, "w") as file_write:
+        with open(temp_file, "w", encoding="utf-8") as file_write:
             while line := file_read.readline():
                 if not line.startswith(category_to_delete):
                     file_write.write(line)
@@ -62,7 +63,7 @@ def is_finished(last_category, ids_file=YOUTUBE8M_IDS_FILE):
     """
     if osp.exists(ids_file):
         # Get last line:
-        with open(ids_file, "r") as file:
+        with open(ids_file, "r", encoding="utf-8") as file:
             while line := file.readline():
                 prev_line = line
                 pass
@@ -181,7 +182,7 @@ def save_ids():
         write_mode = "a"
 
     count = 0
-    with open(YOUTUBE8M_IDS_FILE, write_mode) as file:
+    with open(YOUTUBE8M_IDS_FILE, write_mode, encoding="utf-8") as file:
         for i, values in enumerate(gen_ids(mids, categories)):
             youtube_ids, category = values
             youtube_ids = [category + "," + yid for yid in youtube_ids]
