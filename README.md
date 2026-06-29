@@ -19,19 +19,14 @@ Implements FlowNet Simple for learning optical flow without ground-truth labels 
 Make sure you have python with poetry installed.
 Also install ffmpeg.
 
+Download the sintel dataset for benchmarking:
+https://sintel.is.tue.mpg.de/downloads
+
 First, install the environment (requires python 3.12):
 poetry install
 
-The next command will download youtube8m video ids, then it will use these ids to download youtube videos and split them into frames, by scene.
-The downloaded frames are the ones with continuous scenes, near the middle of the film:
+Download youtube8m videos
 python src/optical_flow/scripts/download_images.py
 
-Train
-Bashpython scripts/train_flownet.py
-References
-
-FlowNet
-YouTube-8M
-
-
-Python • Research/Educational
+Train flownet:
+python scripts/train_flownet.py
