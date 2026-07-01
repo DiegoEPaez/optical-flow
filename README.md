@@ -16,17 +16,21 @@ Implements FlowNet Simple for learning optical flow without ground-truth labels 
 - HRNet backbone (experimental)
 
 ## Running the Project
-Make sure you have python with poetry installed.
-Also install ffmpeg.
+The project is designed to run as a containerized application, although it requires the sintel
+and YouTube videos to be available. YouTube videos can be obtained by running:
 
-Download the sintel dataset for benchmarking:
-https://sintel.is.tue.mpg.de/downloads
+python __main__.py download-images
 
-First, install the environment (requires python 3.12):
-poetry install
+Sintel data must be downloaded from the webpage:
 
-Download youtube8m videos
-python src/optical_flow/scripts/download_images.py
+https://sintel.is.tue.mpg.de/
 
-Train flownet:
-python scripts/train_flownet.py
+Make sure torch and torchvision in pyproject.toml work accordingly to your setup.
+Also, the project assumes the data can be read from an S3 AWS bucket, please
+modify accordingly.
+
+FlowNet
+YouTube-8M
+
+
+Python • Research/Educational
